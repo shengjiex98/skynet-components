@@ -673,7 +673,10 @@ export function solarRaDec(jd) {
 
     ra = rerange(ra, 0, 360) / 15.0
 
-    return [ra, dec];
+    return {
+        ra: ra,
+        dec: dec
+    };
 }
 
 /**
