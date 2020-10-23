@@ -4,7 +4,7 @@
         <VisibilityChart 
             :chartId="chartId" 
             :target="target"
-            :sites="sites"
+            :initialSites="initialSites"
             :options="options"
         >
         </VisibilityChart>
@@ -13,6 +13,12 @@
                 <input v-model="chartId">
                 <input v-model="options.minEle">
                 <input v-model="options.maxSun">
+                <input v-model="options.shade">
+                <ul>
+                    <li v-for="item in showControl" :key="item.name">
+                        <label><input type="checkbox" v-model="options.show[item.name]">{{ item.name }}</label>
+                    </li>
+                </ul>
             </form>
         </div>
     </div>
@@ -31,7 +37,7 @@ export default {
                 ra: 21,
                 dec: -12.5
             },
-            sites: [
+            initialSites: [
                 {
                     name: "PROMPT",
                     lat: -30.2,
@@ -49,7 +55,24 @@ export default {
             options: {
                 minEle: 30,
                 maxSun: -18,
+                show: {
+                    "PROMPT": true,
+                    "PROMPT-MO": true,
+                    "Morehead": false
+                },
+                shades: [-18, -12, -6, 0]
             }
+        }
+    },
+    computed: {
+        showControl: function() {
+            let res = [];
+            for (let item in this.options.show) {
+                res.push({
+                    name: item,
+                })
+            }
+            return res;
         }
     },
     components: {

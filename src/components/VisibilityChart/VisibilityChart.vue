@@ -20,49 +20,68 @@
 import Chart from "chart.js";
 
 import { raDecToAzEl, jdNow, solarRaDec } from "./skynet-astro.ts"
-import { siteData, initialData } from "./data.js";
-import { fRange } from "./my-math.js";
-import { colors } from './config';
+import { fRange } from "./util.js";
+import { chartOptions, minEleSettings, shadeColors, shadeSettings, siteColors, siteSettings } from './config.js';
 
 export default {
-    props: [ "chartId", "target", "sites", "options" ],
+    props: [ "chartId", "target", "initialSites", "options" ],
     data: function () {
         return {
             xRange: fRange(0, 24),
             chart: null,
+            sites: this.initialSites.map(x => ({
+                lat: x.lat,
+                lon: x.lon,
+                name: x.name,
+                data: null,
+                shade: null,
+                color: null,
+            })),
+            lastShadeId: null,
         };
     },
     computed: {
-        minEleFunc: function () {
-            return () => this.options.minEle;
+        siteCount: function () {
+            return this.sites.length;
+        },
+        shadeCount: function () {
+            return this.options.shades.length - 1;
         },
     },
     watch: {
         "options.minEle": function () {
-            console.log("minEle watcher");
-            this.chart.data.datasets[0].data = this.generateData(
-                () => this.options.minEle
-            );
+            console.log("minEle changed");
+            this.updateChartMinEle();
             this.chart.update(0);
         },
         "options.maxSun": function () {
-            for (let i = 4; i < this.chart.data.datasets.length; i++) {
-                let lat = this.sites[i - 4].lat;
-                let lon = this.sites[i - 4].lon;
-                let curJd = jdNow();
-                let solar = solarRaDec(curJd + 0.5);
-
-                this.chart.data.datasets[i].data = this.generateData(
-                    (x) => (
-                        raDecToAzEl(solar[0], solar[1], lon, lat, curJd + x / 24.0)[1] < this.options.maxSun ?
-                            raDecToAzEl(this.target.ra, this.target.dec, lon, lat, curJd + x / 24.0)[1] : null
-                    )
-                );
-                this.chart.update(0);
+            console.log("maxSun changed");
+            for (let site of this.sites) {
+                site.data = this.siteData(site);
             }
+            this.updateChartSites();
+            this.chart.update(0);
+        },
+        "options.show": {
+            handler: function () {
+                console.log("Visibility changed");
+                this.updateChartSites();
+                this.chart.update(0);
+            },
+            deep: true
+        },
+        "options.shades": function () {
+            // Recalculate site.shade for each site
+            // Delete datasets inside this.chart that is for shading
+            // Create more datasets as needed.
+            
         }
     },
     methods: {
+        /**
+         * This function takes a function y = f(x) and generates an array of 
+         * data in the form of { x, y } based on the this.xRange.
+         */
         generateData(myFunc, ...args) {
             return this.xRange.map(x => ({
                 x: x,
@@ -77,68 +96,117 @@ export default {
                 options: chartData.options,
             })
         },
-        drawSite(site, color) {
-            const lat = site.lat;
-            const lon = site.lon;
-            const curJd = jdNow();
-            const solar = solarRaDec(curJd + 0.5);
-
-            let data = this.generateData(
-                (x) => (
-                    raDecToAzEl(solar[0], solar[1], lon, lat, curJd + x / 24.0)[1] < this.options.maxSun ?
-                        raDecToAzEl(this.target.ra, this.target.dec, lon, lat, curJd + x / 24.0)[1] : null
-                )
-            );
-
-            let newSite = siteData();
-            newSite.data = data;
-            newSite.label = site.name;
-            newSite.borderColor = color;
-            newSite.shading = this.shadeSun(site);
-
-            // console.log(site);
-            // console.log(data);
-
-            this.chart.data.datasets.push(newSite);
-            this.chart.update(0);
+        getEle(target, site, jd) {
+            return raDecToAzEl(target.ra, target.dec, site.lon, site.lat, jd)[1];
         },
-        shadeSun(site) {
-            const lat = site.lat;
-            const lon = site.lon;
+        siteData(site) {
             const curJd = jdNow();
             const solar = solarRaDec(curJd + 0.5);
-
-            let sunEle = (x) => (
-                raDecToAzEl(solar[0], solar[1], lon, lat, curJd + x / 24.0)[1]
+            return this.generateData(
+                (x) => this.getEle(solar, site, curJd + x / 24.0) < this.options.maxSun ?
+                    this.getEle(this.target, site, curJd + x / 24.0) : null
             );
-            const shades = [-18, -12, -6, 0];
-            let shading = [];
-            for (let i = 0; i < 3; i++) {
-                shading.push(this.generateData(
-                    (x) => sunEle(x) >= shades[i] && sunEle(x) <= shades[i + 1] ? 
-                        90 : null
+        },
+        siteShade(site) {
+            const curJd = jdNow();
+            const solar = solarRaDec(curJd + 0.5);
+            let shade = [];
+            for (let i = 0; i < this.shadeCount; i++) {
+                shade.push(this.generateData(
+                    (x) => {
+                        // Cache sun elevation to reduce redundant calculation.
+                        let se = this.getEle(solar, site, curJd + x / 24.0);
+                        return se >= this.options.shades[i] && se <= this.options.shades[i + 1] ? 90 : null;
+                    }
                 ));
             }
-            return shading;
+            return shade;
+        },
+        updateChartMinEle() {
+            this.chart.data.datasets[0].data = this.generateData(() => this.options.minEle);
+        },
+        updateChartSites() {
+            for (let i = 0; i < this.siteCount; i++) {
+                if (this.chart.data.datasets[1 + i]) {
+                    this.chart.data.datasets[1 + i].data = this.sites[i].data;
+                    this.chart.data.datasets[1 + i].hidden = !this.options.show[this.sites[i].name];
+                }
+            }
+        },
+        updateChartShades(siteid, enter = true) {
+            if (enter) {
+                for (let i = 0; i < this.shadeCount; i++) {
+                    this.chart.data.datasets[1 + this.siteCount + i].data = this.sites[siteid].shade[i];
+                    this.chart.data.datasets[1 + this.siteCount + i].hidden = false;
+                }
+                for (let i = 0; i < this.siteCount; i++) {
+                    this.chart.data.datasets[1 + i].hidden = (i !== siteid);
+                }
+            } else {
+                for (let i = 0; i < this.shadeCount; i++) {
+                    this.chart.data.datasets[1 + this.siteCount + i].hidden = true;
+                }
+                for (let i = 0; i < this.siteCount; i++) {
+                    this.chart.data.datasets[1 + i].hidden = !this.options.show[this.sites[i].name];
+                }
+            }
+        },
+        updateChart() {
+            this.updateChartMinEle();
+            this.updateChartSites();
+            // this.updateChartShades();
+            this.chart.update(0);
+        },
+        onHover(event, legendItem) {
+        // onHover() {
+            // if (this.chart.options.legend.lastLegend === legendItem.datasetIndex)
+            //     return;
+            // this.chart.options.legend.lastLegend = legendItem.datasetIndex;
+            // console.log("onenter");
+            this.updateChartShades(legendItem.datasetIndex - 1, true);
+            this.chart.update(0);
+        },
+        onLeave(event, legendItem) {
+            // console.log("onleave");
+            this.updateChartShades(legendItem.datasetIndex - 1, false);
+            this.chart.update(0);
         }
     },
     mounted: function () {
         console.log("Mounted");
-        this.chart = this.createChart(this.chartId, initialData());
-        this.chart.data.datasets[0].data = this.generateData(
-            () => this.options.minEle
-        );
-        
-        let palette = [];
-        for (const color in colors) {
-            palette.push(colors[color]);
-        }
-        let colorIndex = 0;
-        for (const site of this.sites) {
-            this.drawSite(site, palette[colorIndex++]);
+
+        let colorCount = 0;
+        for (let site of this.sites) {
+            site.data = this.siteData(site);
+            site.shade = this.siteShade(site);
+            site.color = siteColors[colorCount++];
         }
 
-        this.shadeSun(this.sites[0]);
+        this.chart = this.createChart(this.chartId, chartOptions);
+        this.chart.options.legend.onHover = this.onHover;
+        this.chart.options.legend.onLeave = this.onLeave;
+
+        this.chart.data.datasets.push({
+            label: null,
+            ...minEleSettings
+        });
+        for (let i = 0; i < this.siteCount; i++) {
+            this.chart.data.datasets.push({
+                label: this.sites[i].name,
+                borderColor: this.sites[i].color,
+                ...siteSettings
+            })
+        }
+        for (let i = 0; i < this.shadeCount; i++) {
+            this.chart.data.datasets.push({
+                label: null,
+                backgroundColor: shadeColors[i],
+                ...shadeSettings
+            })
+        }
+
+        this.updateChart();
+        console.log(this.chart.data.datasets);
     }
 }
 </script>
