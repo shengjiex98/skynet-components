@@ -4,19 +4,30 @@
         <VisibilityChart 
             :chartId="chartId" 
             :target="target"
-            :initialSites="initialSites"
-            :options="options"
+            :sites="sites"
+            :minEle="minEle"
+            :maxSun="maxSun"
+            :range="range"
         >
         </VisibilityChart>
         <div>
             <form>
-                <input v-model="chartId">
-                <input v-model="options.minEle">
-                <input v-model="options.maxSun">
-                <input v-model="options.shade">
+                <div>
+                    <!-- <p>ID <input v-model="chartId"></p> -->
+                    <p>ID: {{ chartId }}</p>
+                    <p>Target <input v-model="target.ra"> <input v-model="target.dec"></p>
+                    <p>minEle <input v-model="minEle"></p>
+                    <p>maxSun <input v-model="maxSun"></p>
+                </div>
+                <div>
+                    <p>Range</p>
+                    <input v-model="range.start">
+                    <input v-model="range.stop">
+                </div>
+                <!-- <input v-model="shades"> -->
                 <ul>
-                    <li v-for="item in showControl" :key="item.name">
-                        <label><input type="checkbox" v-model="options.show[item.name]">{{ item.name }}</label>
+                    <li v-for="site of siteList" :key="site.name">
+                        <label><input type="checkbox" v-model="site.show">{{ site.name }}</label>
                     </li>
                 </ul>
             </form>
@@ -25,6 +36,8 @@
 </template>
 
 <script>
+// import { shadeColors } from "./components/VisibilityChart/config.js";
+import { siteColors } from "./components/VisibilityChart/config.js";
 import VisibilityChart from "./components/VisibilityChart/VisibilityChart.vue";
 
 export default {
@@ -37,42 +50,47 @@ export default {
                 ra: 21,
                 dec: -12.5
             },
-            initialSites: [
+            minEle: 30,
+            maxSun: -18,
+            range: {
+                start: 0,
+                stop: 24,
+            },
+            siteList: [
                 {
                     name: "PROMPT",
                     lat: -30.2,
                     lon: -70.8,
+                    color: siteColors[0],
+                    show: true,
                 }, {
                     name: "PROMPT-MO",
                     lat: -31.6,
                     lon: 117.0,
+                    color: siteColors[1],
+                    show: true,
                 }, {
                     name: "Morehead",
                     lat: 35.9,
                     lon: -79.0,
+                    color: siteColors[2],
+                    show: true,
                 }
-            ],
-            options: {
-                minEle: 30,
-                maxSun: -18,
-                show: {
-                    "PROMPT": true,
-                    "PROMPT-MO": true,
-                    "Morehead": false
-                },
-                shades: [-18, -12, -6, 0]
-            }
+            ]
         }
     },
     computed: {
-        showControl: function() {
-            let res = [];
-            for (let item in this.options.show) {
-                res.push({
-                    name: item,
-                })
-            }
-            return res;
+        // showControl: function() {
+        //     let res = [];
+        //     for (let item in this.options.show) {
+        //         res.push({
+        //             name: item,
+        //         })
+        //     }
+        //     return res;
+        // }
+        sites: function () {
+            return this.siteList.filter(x => x.show);
         }
     },
     components: {
