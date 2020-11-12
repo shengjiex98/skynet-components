@@ -40,7 +40,7 @@ export function rad(degree) {
  */
 export function fRange(start, end, steps=500) {
     let data = [];
-    let x = start;
+    let x = Number(start);
     let step = (end - start) / steps;
     for (let i = 0; i <= steps; i++) {
         data.push(x);
