@@ -33,6 +33,22 @@ export const shadeColors = [
     'rgba(177, 204, 230, 0.5)'
 ];
 
+export const defaultShadings = [
+    {
+        min: -18,
+        max: -12,
+        color: shadeColors[0]
+    }, {
+        min: -12,
+        max: -6,
+        color: shadeColors[1]
+    }, {
+        min: -6,
+        max: 0,
+        color: shadeColors[2]
+    }
+];
+
 export const minEleSettings = {
     borderColor: colors["gray"],
     backgroundColor: colors["white-0"],
@@ -60,73 +76,70 @@ export const shadeSettings = {
     showLabel: false
 };
 
-export const chartOptions = {
-    type: "line",
-    options: {
-        legend: {
-            labels: {
-                filter: function (legendItem, data) {
-                    return data.datasets[legendItem.datasetIndex].showLabel;
-                }
+export const chartOptions = () => ({
+    legend: {
+        labels: {
+            filter: function (legendItem, data) {
+                return data.datasets[legendItem.datasetIndex].showLabel;
+            }
+        },
+    },
+    tooltips: {
+        mode: "nearest",
+        callbacks: {
+            title: function () {
+                return null;
+            },
+            label: function (tooltipItem) {
+                return "(" + round(tooltipItem.xLabel, 2) + ", " +
+                    round(tooltipItem.yLabel, 2) + ")";
             },
         },
-        tooltips: {
-            mode: "nearest",
-            callbacks: {
-                title: function () {
-                    return null;
-                },
-                label: function (tooltipItem) {
-                    return "(" + round(tooltipItem.xLabel, 2) + ", " +
-                        round(tooltipItem.yLabel, 2) + ")";
-                },
+    },
+    responsive: true,
+    lineTension: 0,
+    scales: {
+        xAxes: [{
+            scaleLabel: {
+                labelString: "Time from now",
             },
-        },
-        responsive: true,
-        lineTension: 0,
-        scales: {
-            xAxes: [{
-                scaleLabel: {
-                    labelString: "Time from now",
-                },
+            type: "linear",
+            position: "bottom",
+            ticks: {
+                stepSize: 2,
+                suggestedMin: 0,
+                suggestedMax: 24,
+            }
+        }],
+        yAxes: [
+            {
                 type: "linear",
-                position: "bottom",
                 ticks: {
-                    stepSize: 2,
+                    // beginAtZero: true,
+                    // padding: 24,
                     min: 0,
-                    max: 24,
+                    max: 90,
+                    stepSize: 15,
                 }
-            }],
-            yAxes: [
-                {
-                    type: "linear",
-                    ticks: {
-                        // beginAtZero: true,
-                        // padding: 24,
-                        min: 0,
-                        max: 90,
-                        stepSize: 15,
-                    }
+            },
+            {
+                type: "logarithmic",
+                position: "right",
+                gridLines: {
+                    display: false
                 },
-                {
-                    type: "logarithmic",
-                    position: "right",
-                    gridLines: {
-                        display: false
-                    },
-                    ticks: {
-                        reverse: true,
-                        min: 1.0,
-                        max: 6.0,
-                        callback: function (value) {
-                            return round(value, 2);
-                        }
+                ticks: {
+                    reverse: true,
+                    min: 1.0,
+                    max: 6.0,
+                    callback: function (value) {
+                        return round(value, 2);
                     }
                 }
-            ]
-        }
+            }
+        ]
     }
-}
+});
 
 /**
  *  This function takes a string containing a hexadecimal number and return a rgb string represented
