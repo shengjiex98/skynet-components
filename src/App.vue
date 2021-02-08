@@ -36,8 +36,8 @@
 </template>
 
 <script>
-// import { shadeColors } from "./components/VisibilityChart/config.js";
-import { siteColors } from "./components/VisibilityChart/config.js";
+// import { shadeColors } from "./components/VisibilityChart/config.ts";
+import { siteColors } from "./components/VisibilityChart/config.ts";
 import VisibilityChart from "./components/VisibilityChart/VisibilityChart.vue";
 
 export default {

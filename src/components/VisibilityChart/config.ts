@@ -1,6 +1,6 @@
 'use strict';
 
-import { round } from "./util.js";
+import { round } from "./util";
 
 // The hexToDecimal() function only accepts lower case (can make it supports upper case)
 export const colors = {
@@ -132,7 +132,7 @@ export const chartOptions = () => ({
                     reverse: true,
                     min: 1.0,
                     max: 6.0,
-                    callback: function (value) {
+                    callback: function (value: number): number {
                         return round(value, 2);
                     }
                 }
@@ -148,7 +148,7 @@ export const chartOptions = () => ({
  *  @param opacity: Opacity of the returned rgb string. Default is 1.
  *  @returns {string}
  */
-function rgbString(rgb, opacity = 1) {
+function rgbString(rgb: string, opacity: number = 1): string {
     let r = hexToDecimal(rgb, 1, 2);
     let g = hexToDecimal(rgb, 3, 4);
     let b = hexToDecimal(rgb, 5, 6);
@@ -163,7 +163,7 @@ function rgbString(rgb, opacity = 1) {
  *  @param t:       The ending position of the portion of the string. Inclusive.
  *  @returns {number}
  */
-function hexToDecimal(hex, s, t) {
+function hexToDecimal(hex: string, s: number, t: number): number {
     let result = 0;
     for (let i = s; i <= t; i++) {
         result <<= 4;

@@ -19,8 +19,8 @@
 import Chart from "chart.js";
 
 import { raDecToAzEl, jdNow, solarRaDec } from "./skynet-astro.ts"
-import { fRange } from "./util.js";
-import { chartOptions, defaultShadings, minEleSettings, shadeSettings, siteSettings } from './config.js';
+import { fRange } from "./util.ts";
+import { chartOptions, defaultShadings, minEleSettings, shadeSettings, siteSettings } from './config.ts';
 
 export default {
     props: {

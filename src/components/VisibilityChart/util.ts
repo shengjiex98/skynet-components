@@ -7,7 +7,7 @@
  * @param digits:  The decimal places to round the value.
  * @returns {number}
  */
-export function round(value, digits) {
+export function round(value: number, digits: number): number {
     return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
 }
 
@@ -16,7 +16,7 @@ export function round(value, digits) {
  * @param n:       The input number to be squared.
  * @returns {number}
  */
-export function sqr(n) {
+export function sqr(n: number): number {
     return Math.pow(n, 2);
 }
 
@@ -25,7 +25,7 @@ export function sqr(n) {
  * @param degree:  An angle in degrees
  * @returns {number}
  */
-export function rad(degree) {
+export function rad(degree: number): number {
     return degree / 180 * Math.PI;
 }
 
@@ -38,10 +38,10 @@ export function rad(degree) {
  * @param {number} steps    The number of steps
  * @returns {Array}
  */
-export function fRange(start, end, steps=500) {
-    let data = [];
-    let x = Number(start);
-    let step = (end - start) / steps;
+export function fRange(start: number, end: number, steps=500): number[] {
+    let data: number[] = [];
+    let x: number = start;
+    let step: number = (end - start) / steps;
     for (let i = 0; i <= steps; i++) {
         data.push(x);
         x += step;
@@ -50,19 +50,19 @@ export function fRange(start, end, steps=500) {
 }
 
 export let ArrMath = {
-    max: function (arr) {
+    max: function (arr: number[]): number[] {
         return Math.max.apply(null, arr);
     },
-    min: function (arr) {
+    min: function (arr: number[]): number[] {
         return Math.min.apply(null, arr);
     },
-    sum: function (arr) {
+    sum: function (arr: number[]): number {
         return arr.reduce((acc, cur) => acc + cur, 0);
     },
-    mean: function (arr) {
+    mean: function (arr: number[]): number {
         return this.sum(arr) / arr.length;
     },
-    mul: function (arr1, arr2) {
+    mul: function (arr1: any, arr2: any): number | number[] {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
             console.assert(arr1.length === arr2.length, 
                 "Error: Dimension mismatch when multiplying two arrays.");
@@ -75,7 +75,7 @@ export let ArrMath = {
             return arr1 * arr2;
         }
     },
-    div: function (arr1, arr2) {
+    div: function (arr1: any, arr2: any): number | number[] {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
             console.assert(arr1.length === arr2.length, 
                 "Error: Dimension mismatch when dividing two arrays.");
@@ -88,7 +88,7 @@ export let ArrMath = {
             return arr1 / arr2;
         }
     },
-    add: function (arr1, arr2) {
+    add: function (arr1: any, arr2: any): number | number[] {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
             console.assert(arr1.length === arr2.length, 
                 "Error: Dimension mismatch when adding two arrays.");
@@ -101,7 +101,7 @@ export let ArrMath = {
             return arr1 + arr2;
         }
     },
-    sub: function (arr1, arr2) {
+    sub: function (arr1: any, arr2: any): number | number[] {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
             console.assert(arr1.length === arr2.length, 
                 "Error: Dimension mismatch when subtracting two arrays.");
@@ -114,7 +114,7 @@ export let ArrMath = {
             return arr1 - arr2;
         }
     },
-    dot: function (arr1, arr2) {
+    dot: function (arr1: any, arr2: any): number | number[] {
         if (arr2 === undefined) {
             return this.dot(arr1, arr1);
         }
@@ -128,13 +128,13 @@ export let ArrMath = {
             throw new TypeError("Error: Can't take dot product of a vector and a number");
         }
     },
-    cos: function (arr) {
+    cos: function (arr: number[]): number[] {
         return arr.map(x => Math.cos(x));
     },
-    sin: function (arr) {
+    sin: function (arr: number[]): number[] {
         return arr.map(x => Math.sin(x));
     },
-    var: function (arr) {
+    var: function (arr: number[]): number {
         // Variance
         let mean = this.mean(arr);
         return this.sum(arr.map(x => Math.pow(x - mean, 2))) / arr.length;
