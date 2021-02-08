@@ -35,14 +35,14 @@
     </div>
 </template>
 
-<script>
-// import { shadeColors } from "./components/VisibilityChart/config.ts";
-import { siteColors } from "./components/VisibilityChart/config.ts";
-import VisibilityChart from "./components/VisibilityChart/VisibilityChart.vue";
+<script lang="ts">
+import Vue from 'vue';
+import { siteColors } from "./components/VisibilityChart/config";
+import VisibilityChart from './components/VisibilityChart/VisibilityChart.vue';
 
-export default {
-    name: 'App',
-    data: function () {
+export default Vue.extend({
+  name: 'App',
+  data: function () {
         return {
             chartId: "test",
             target: {
@@ -90,13 +90,14 @@ export default {
         //     return res;
         // }
         sites: function () {
+            // @ts-ignore
             return this.siteList.filter(x => x.show);
         }
     },
     components: {
         VisibilityChart,
     }
-}
+});
 </script>
 
 <style scoped>

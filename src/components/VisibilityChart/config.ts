@@ -79,7 +79,7 @@ export const shadeSettings = {
 export const chartOptions = () => ({
     legend: {
         labels: {
-            filter: function (legendItem, data) {
+            filter: function (legendItem: any, data: any): string {
                 return data.datasets[legendItem.datasetIndex].showLabel;
             }
         },
@@ -90,7 +90,7 @@ export const chartOptions = () => ({
             title: function () {
                 return null;
             },
-            label: function (tooltipItem) {
+            label: function (tooltipItem: any): string {
                 return "(" + round(tooltipItem.xLabel, 2) + ", " +
                     round(tooltipItem.yLabel, 2) + ")";
             },

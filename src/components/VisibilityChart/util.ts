@@ -50,10 +50,10 @@ export function fRange(start: number, end: number, steps=500): number[] {
 }
 
 export let ArrMath = {
-    max: function (arr: number[]): number[] {
+    max: function (arr: number[]): number {
         return Math.max.apply(null, arr);
     },
-    min: function (arr: number[]): number[] {
+    min: function (arr: number[]): number {
         return Math.min.apply(null, arr);
     },
     sum: function (arr: number[]): number {

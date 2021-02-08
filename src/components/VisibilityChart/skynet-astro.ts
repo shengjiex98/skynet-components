@@ -1,5 +1,7 @@
 /* Utility functions that are useful for doing astronomy */
 
+// @ts-nocheck
+
 import { sprintf } from 'sprintf-js';
 
 let gmas000 = 2451545.0; /* Epoch gmas000 in julian days */
