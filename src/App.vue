@@ -1,8 +1,8 @@
 <template>
     <div>
         <!-- {{ planetData.options }} -->
-        <VisibilityChart 
-            :chartId="chartId" 
+        <VisibilityChart
+            :chartId="chartId"
             :target="target"
             :sites="sites"
             :minEle="minEle"
@@ -13,21 +13,26 @@
         <div>
             <form>
                 <div>
-                    <!-- <p>ID <input v-model="chartId"></p> -->
                     <p>ID: {{ chartId }}</p>
-                    <p>Target <input v-model="target.ra"> <input v-model="target.dec"></p>
-                    <p>minEle <input v-model="minEle"></p>
-                    <p>maxSun <input v-model="maxSun"></p>
+                    <p>
+                        Target <input v-model="target.ra" /> <input v-model="target.dec" />
+                    </p>
+                    <p>minEle <input v-model="minEle" /></p>
+                    <p>maxSun <input v-model="maxSun" /></p>
                 </div>
                 <div>
                     <p>Range</p>
-                    <input v-model="range.start">
-                    <input v-model="range.stop">
+                    <input v-model="range.start" />
+                    <input v-model="range.stop" />
                 </div>
                 <!-- <input v-model="shades"> -->
                 <ul>
                     <li v-for="site of siteList" :key="site.name">
-                        <label><input type="checkbox" v-model="site.show">{{ site.name }}</label>
+                        <label
+                            ><input type="checkbox" v-model="site.show" />{{
+                                site.name
+                            }}</label
+                        >
                     </li>
                 </ul>
             </form>
@@ -36,73 +41,53 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import { siteColors } from "./components/VisibilityChart/config";
-import VisibilityChart from './components/VisibilityChart/VisibilityChart.vue';
+import { Component, Vue } from "vue-property-decorator";
 
-export default Vue.extend({
-  name: 'App',
-  data: function () {
-        return {
-            chartId: "test",
-            target: {
-                name: "M73",
-                ra: 21,
-                dec: -12.5
-            },
-            minEle: 30,
-            maxSun: -18,
-            range: {
-                start: 0,
-                stop: 24,
-            },
-            siteList: [
-                {
-                    name: "PROMPT",
-                    lat: -30.2,
-                    lon: -70.8,
-                    color: siteColors[0],
-                    show: true,
-                }, {
-                    name: "PROMPT-MO",
-                    lat: -31.6,
-                    lon: 117.0,
-                    color: siteColors[1],
-                    show: true,
-                }, {
-                    name: "Morehead",
-                    lat: 35.9,
-                    lon: -79.0,
-                    color: siteColors[2],
-                    show: true,
-                }
-            ]
-        }
-    },
-    computed: {
-        // showControl: function() {
-        //     let res = [];
-        //     for (let item in this.options.show) {
-        //         res.push({
-        //             name: item,
-        //         })
-        //     }
-        //     return res;
-        // }
-        sites: function () {
-            // @ts-ignore
-            return this.siteList.filter(x => x.show);
-        }
-    },
+import VisibilityChart from "./components/VisibilityChart/VisibilityChart.vue";
+import { siteColors } from "./components/VisibilityChart/config";
+import { Range, Target, Site } from "./components/VisibilityChart/type";
+
+
+@Component({
     components: {
         VisibilityChart,
-    }
-});
+    },
+})
+export default class App extends Vue {
+    chartId: string = "test";
+
+    minEle: number = 30;
+    maxSun: number = -18;
+    range: Range = { start: 0, stop: 24 };
+
+    target: Target = { name: "M73", ra: 21, dec: -12.5 };
+
+    sites: Site[] = [
+        {
+            name: "PROMPT",
+            lat: -30.2,
+            lon: -70.8,
+            color: siteColors[0],
+        },
+        {
+            name: "PROMPT-MO",
+            lat: -31.6,
+            lon: 117.0,
+            color: siteColors[1],
+        },
+        {
+            name: "Morehead",
+            lat: 35.9,
+            lon: -79.0,
+            color: siteColors[2],
+        },
+    ];
+}
 </script>
 
 <style scoped>
-    div {
-        width: 80%;
-        margin: 2em auto;
-    }
+div {
+    width: 80%;
+    margin: 2em auto;
+}
 </style>

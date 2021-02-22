@@ -1,6 +1,8 @@
 'use strict';
 
 import { round } from "./util";
+import { Shading } from "./type";
+import { ChartOptions } from "chart.js";
 
 // The hexToDecimal() function only accepts lower case (can make it supports upper case)
 export const colors = {
@@ -27,13 +29,13 @@ export const siteColors = [
     colors['bright']
 ];
 
-export const shadeColors = [
+export const shadeColors: string[] = [
     'rgba(103, 121, 138, 0.5)',
     'rgba(136, 159, 181, 0.5)',
     'rgba(177, 204, 230, 0.5)'
 ];
 
-export const defaultShadings = [
+export const defaultShadings: Shading[] = [
     {
         min: -18,
         max: -12,
@@ -76,7 +78,7 @@ export const shadeSettings = {
     showLabel: false
 };
 
-export const chartOptions = () => ({
+export const chartOptions: () => ChartOptions = () => ({
     legend: {
         labels: {
             filter: function (legendItem: any, data: any): string {
@@ -88,7 +90,7 @@ export const chartOptions = () => ({
         mode: "nearest",
         callbacks: {
             title: function () {
-                return null;
+                return "";
             },
             label: function (tooltipItem: any): string {
                 return "(" + round(tooltipItem.xLabel, 2) + ", " +
