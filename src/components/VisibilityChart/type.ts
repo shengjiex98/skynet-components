@@ -1,3 +1,4 @@
+import { ChartPoint } from "chart.js"
 
 export interface Range {
     start: number;
@@ -23,8 +24,8 @@ export interface SiteCache {
     lon: number;
     color: string;
     show: boolean;
-    data: Coordinate[];
-    shadeData: Coordinate[][];
+    data: ChartPoint[];
+    shadeData: ChartPoint[][];
 };
 
 export interface Shading {
@@ -32,8 +33,3 @@ export interface Shading {
     max: number,
     color: string;
 };
-
-export interface Coordinate {
-    x: number,
-    y: number | null
-}

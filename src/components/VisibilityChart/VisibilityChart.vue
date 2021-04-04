@@ -23,7 +23,7 @@ import Chart, { ChartLegendLabelItem, ChartPoint } from "chart.js";
 import { raDecToAzEl, jdNow, solarRaDec } from "./skynet-astro";
 import { fRange } from "./util";
 import { chartOptions, defaultShadings, minEleSettings, shadeSettings, siteSettings } from './config';
-import { Range, Site, Target, Shading, SiteCache, Coordinate } from "./type";
+import { Range, Site, Target, Shading, SiteCache } from "./type";
 import { ChartLegendItem } from "chart.js";
 
 @Component
@@ -38,7 +38,7 @@ export default class VisibilityChart extends Vue {
     @Prop() readonly range: Range = { start: 0, stop: 24 };
     
     cache: Map<string, SiteCache> = new Map<string, SiteCache>();
-    chart: Chart | undefined;
+    chart: Chart | null;
     
     get xRange(): number[] {
         return fRange(this.range.start, this.range.stop);
@@ -175,10 +175,10 @@ export default class VisibilityChart extends Vue {
     /** 
      * Generates the data used for shading for each individual site.
      */
-    siteShades(site: Site | SiteCache): Coordinate[][] {
+    siteShades(site: Site | SiteCache): ChartPoint[][] {
         const curJd = jdNow();
         const solar = solarRaDec(curJd + 0.5);
-        let shadeData: Coordinate[][] = [];
+        let shadeData: ChartPoint[][] = [];
         for (let i = 0; i < this.shades.length; i++) {
             shadeData.push(this.generateData(
                 (x) => {
