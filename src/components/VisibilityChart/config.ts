@@ -1,7 +1,7 @@
 'use strict';
 
 import { round } from "./util";
-import { Shading } from "./type";
+import { Range, Shading } from "./type";
 import { ChartOptions } from "chart.js";
 
 // The hexToDecimal() function only accepts lower case (can make it supports upper case)
@@ -35,21 +35,30 @@ export const shadeColors: string[] = [
     'rgba(177, 204, 230, 0.5)'
 ];
 
-export const defaultShadings: Shading[] = [
-    {
-        min: -18,
-        max: -12,
-        color: shadeColors[0]
-    }, {
-        min: -12,
-        max: -6,
-        color: shadeColors[1]
-    }, {
-        min: -6,
-        max: 0,
-        color: shadeColors[2]
+export function defaultRange(): Range {
+    return {
+        start: 0,
+        stop: 24
     }
-];
+}
+
+export function defaultShadings(): Shading[] {
+    return [
+        {
+            min: -18,
+            max: -12,
+            color: shadeColors[0]
+        }, {
+            min: -12,
+            max: -6,
+            color: shadeColors[1]
+        }, {
+            min: -6,
+            max: 0,
+            color: shadeColors[2]
+        }
+    ];
+}
 
 export const minEleSettings = {
     borderColor: colors["gray"],
@@ -151,9 +160,9 @@ export const chartOptions: () => ChartOptions = () => ({
  *  @returns {string}
  */
 function rgbString(rgb: string, opacity: number = 1): string {
-    let r = hexToDecimal(rgb, 1, 2);
-    let g = hexToDecimal(rgb, 3, 4);
-    let b = hexToDecimal(rgb, 5, 6);
+    const r = hexToDecimal(rgb, 1, 2);
+    const g = hexToDecimal(rgb, 3, 4);
+    const b = hexToDecimal(rgb, 5, 6);
     return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + opacity + ')';
 }
 
