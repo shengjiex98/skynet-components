@@ -27,12 +27,10 @@
                 </div>
                 <!-- <input v-model="shades"> -->
                 <ul>
-                    <li v-for="site of siteList" :key="site.name">
-                        <label
-                            ><input type="checkbox" v-model="site.show" />{{
-                                site.name
-                            }}</label
-                        >
+                    <li v-for="site of sites" :key="site.name">
+                        <label>
+                            <input type="checkbox" v-model="site.show" />{{site.name}}
+                        </label>
                     </li>
                 </ul>
             </form>
