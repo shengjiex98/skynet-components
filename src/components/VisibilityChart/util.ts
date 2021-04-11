@@ -39,9 +39,9 @@ export function rad(degree: number): number {
  * @returns {Array}
  */
 export function fRange(start: number, end: number, steps=500): number[] {
-    let data: number[] = [];
+    const data: number[] = [];
+    const step: number = (end - start) / steps;
     let x: number = start;
-    let step: number = (end - start) / steps;
     for (let i = 0; i <= steps; i++) {
         data.push(x);
         x += step;
@@ -49,7 +49,7 @@ export function fRange(start: number, end: number, steps=500): number[] {
     return data;
 }
 
-export let ArrMath = {
+export const ArrMath = {
     max: function (arr: number[]): number {
         return Math.max.apply(null, arr);
     },
@@ -136,7 +136,7 @@ export let ArrMath = {
     },
     var: function (arr: number[]): number {
         // Variance
-        let mean = this.mean(arr);
+        const mean = this.mean(arr);
         return this.sum(arr.map(x => Math.pow(x - mean, 2))) / arr.length;
     }
 }
