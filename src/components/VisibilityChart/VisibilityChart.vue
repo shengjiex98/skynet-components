@@ -22,23 +22,22 @@ import Chart, { ChartLegendLabelItem, ChartPoint } from "chart.js";
 
 import { raDecToAzEl, jdNow, solarRaDec } from "./skynet-astro";
 import { fRange } from "./util";
-import { chartOptions, defaultShadings, minEleSettings, shadeSettings, siteSettings } from './config';
+import { chartOptions, defaultRange, defaultShadings, minEleSettings, shadeSettings, siteSettings } from './config';
 import { Range, Site, Target, Shading, SiteCache } from "./type";
-import { ChartLegendItem } from "chart.js";
 
 @Component
 export default class VisibilityChart extends Vue {
-    @Prop({required: true}) readonly chartId: string | undefined;
-    @Prop({required: true}) readonly target: Target | undefined;
-    @Prop({required: true}) readonly sites: Site[] | undefined;
+    @Prop({required: true}) readonly chartId!: string;
+    @Prop({required: true}) readonly target!: Target;
+    @Prop({required: true}) readonly sites!: Site[];
     
-    @Prop() readonly minEle: number = 30;
-    @Prop() readonly maxSun: number = -18;
-    @Prop() readonly shades: Shading[] = defaultShadings;
-    @Prop() readonly range: Range = { start: 0, stop: 24 };
+    @Prop({default: 30}) readonly minEle!: number;
+    @Prop({default: -18}) readonly maxSun!: number;
+    @Prop({default: defaultRange}) readonly range!: Range;
+    @Prop({default: defaultShadings}) readonly shades!: Shading[];
     
     cache: Map<string, SiteCache> = new Map<string, SiteCache>();
-    chart: Chart | null;
+    chart!: Chart;
     
     get xRange(): number[] {
         return fRange(this.range.start, this.range.stop);
@@ -108,8 +107,8 @@ export default class VisibilityChart extends Vue {
     @Watch("range", {deep: true})
     onRangeChanged() {
         console.log("Range changed.");
-        this.chart.options.scales.xAxes[0].ticks.suggestedMin = this.range.start;
-        this.chart.options.scales.xAxes[0].ticks.suggestedMax = this.range.stop;
+        this.chart.options!.scales!.xAxes![0].ticks!.suggestedMin = this.range.start;
+        this.chart.options!.scales!.xAxes![0].ticks!.suggestedMax = this.range.stop;
         this.buildCache();
         this.updateChart();
         this.chart.update({duration: 0});
@@ -119,7 +118,7 @@ export default class VisibilityChart extends Vue {
      * This function takes a function y = f(x) and generates an array of 
      * data in the form of { x, y } based on the this.xRange.
      */
-    generateData(myFunc: (x: number, ...args: any) => number | null, ...args: any) {
+    generateData(myFunc: (x: number, ...args: any) => number | undefined, ...args: any) {
         return this.xRange.map(x => ({
             x: x,
             y: myFunc(x, ...args)
@@ -168,7 +167,7 @@ export default class VisibilityChart extends Vue {
         const solar = solarRaDec(curJd + 0.5);
         return this.generateData(
             (x) => this.getEle(solar, site, curJd + x / 24.0) < this.maxSun ?
-                this.getEle(this.target, site, curJd + x / 24.0) : null
+                this.getEle(this.target, site, curJd + x / 24.0) : undefined
         );
     }
 
@@ -183,7 +182,7 @@ export default class VisibilityChart extends Vue {
             shadeData.push(this.generateData(
                 (x) => {
                     let se = this.getEle(solar, site, curJd + x / 24.0);
-                    return se >= this.shades[i].min && se <= this.shades[i].max ? 90 : null;
+                    return se >= this.shades[i].min && se <= this.shades[i].max ? 90 : undefined;
                 }
             ));
         }
@@ -194,28 +193,32 @@ export default class VisibilityChart extends Vue {
      * The min elevation line always occupies the 0th dataset
      */
     updateChartMinEle(): void {
-        if (!this.chart.data.datasets[0]) {
-            this.chart.data.datasets.push({
-                ...minEleSettings,
-                label: null,
-            });
+        if (this.chart.data.datasets) {
+            if (!this.chart.data.datasets[0]) {
+                this.chart.data.datasets.push({
+                    ...minEleSettings,
+                    label: undefined,
+                });
+            }
+            this.chart.data.datasets[0].data = this.generateData(() => this.minEle);
         }
-        this.chart.data.datasets[0].data = this.generateData(() => this.minEle);
     }
 
     /**
      * The datasets for shadings are number from 1 to this.shades.length
      */
     updateChartShades(): void {
-        while (this.chart.data.datasets.length > 1) {
-            this.chart.data.datasets.pop();
-        }
-        for (let shade of this.shades) {
-            this.chart.data.datasets.push({
-                ...shadeSettings,
-                label: null,
-                backgroundColor: shade.color,
-            })
+        if (this.chart.data.datasets) {
+            while (this.chart.data.datasets.length > 1) {
+                this.chart.data.datasets.pop();
+            }
+            for (let shade of this.shades) {
+                this.chart.data.datasets.push({
+                    ...shadeSettings,
+                    label: undefined,
+                    backgroundColor: shade.color,
+                })
+            }
         }
     }
 
@@ -224,17 +227,19 @@ export default class VisibilityChart extends Vue {
      * to this.shades.length + this.sites.length
      */
     updateChartSites(): void {
-        while (this.chart.data.datasets.length > 1 + this.shades.length) {
-            this.chart.data.datasets.pop();
-        }
-        for (let entry of this.cache) {
-            if (entry[1].show) {
-                this.chart.data.datasets.push({
-                    ...siteSettings,
-                    label: entry[1].name,
-                    data: entry[1].data,
-                    borderColor: entry[1].color
-                });
+        if (this.chart.data.datasets) {
+            while (this.chart.data.datasets.length > 1 + this.shades.length) {
+                this.chart.data.datasets.pop();
+            }
+            for (let entry of this.cache) {
+                if (entry[1].show) {
+                    this.chart.data.datasets.push({
+                        ...siteSettings,
+                        label: entry[1].name,
+                        data: entry[1].data,
+                        borderColor: entry[1].color
+                    });
+                }
             }
         }
     }
@@ -246,28 +251,36 @@ export default class VisibilityChart extends Vue {
     }
 
     onHover(_: any, legendItem: ChartLegendLabelItem): void {
-        let id = legendItem.datasetIndex as number;
-        let site = this.cache.get(this.chart.data.datasets[id].label as string);
-        for (let i = 0; i < this.shades.length; i++) {
-            this.chart.data.datasets[1 + i].data = site.shadeData[i];
-            this.chart.data.datasets[1 + i].hidden = false;
+        if (this.chart.data.datasets) {
+            let id = legendItem.datasetIndex as number;
+            let site = this.cache.get(this.chart.data.datasets[id].label as string);
+            for (let i = 0; i < this.shades.length; i++) {
+                // Non-null assertion of site is valid here because the label of chart is based on
+                //   the same site names that are used for cache's key.
+                this.chart.data.datasets[1 + i].data = site!.shadeData[i];
+                this.chart.data.datasets[1 + i].hidden = false;
+            }
+            for (let i = 0; i < this.cache.size; i++) {
+                this.chart.data.datasets[1 + this.shades.length + i].hidden = 
+                    (1 + this.shades.length + i !== id);
+            }
+            this.chart.update({duration: 0});
         }
-        for (let i = 0; i < this.cache.size; i++) {
-            this.chart.data.datasets[1 + this.shades.length + i].hidden = 
-                (1 + this.shades.length + i !== id);
-        }
-        this.chart.update({duration: 0});
     }
 
     onLeave(): void {
-        for (let i = 0; i < this.shades.length; i++) {
-            this.chart.data.datasets[1 + i].hidden = true;
+        if (this.chart.data.datasets) {
+            for (let i = 0; i < this.shades.length; i++) {
+                this.chart.data.datasets[1 + i].hidden = true;
+            }
+            for (let i = 0; i < this.cache.size; i++) {
+                let site = this.cache.get(this.chart.data.datasets[1 + this.shades.length + i].label!);
+                // Non-null assertion of site is valid here because the label of chart is based on
+                //   the same site names that are used for cache's key.
+                this.chart.data.datasets[1 + this.shades.length + i].hidden = !site!.show;
+            }
+            this.chart.update({duration: 0});
         }
-        for (let i = 0; i < this.cache.size; i++) {
-            this.chart.data.datasets[1 + this.shades.length + i].hidden =
-                !this.cache.get(this.chart.data.datasets[1 + this.shades.length + i].label as string).show;
-        }
-        this.chart.update({duration: 0});
     }
     
     mounted() {
@@ -278,8 +291,10 @@ export default class VisibilityChart extends Vue {
             type: "line",
             options: chartOptions(),
         });
-        this.chart.options.legend.onHover = this.onHover;
-        this.chart.options.legend.onLeave = this.onLeave;
+        if (this.chart.options && this.chart.options.legend) {
+            this.chart.options.legend.onHover = this.onHover;
+            this.chart.options.legend.onLeave = this.onLeave;
+        }
 
         this.buildCache();
         this.updateChart();
