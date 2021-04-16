@@ -1,6 +1,5 @@
 <template>
-    <div>
-        <!-- {{ planetData.options }} -->
+    <div id="vis-chart">
         <VisibilityChart
             :chartId="chartId"
             :target="target"
@@ -84,7 +83,7 @@ export default class App extends Vue {
 </script>
 
 <style scoped>
-div {
+#vis-chart {
     width: 80%;
     margin: 2em auto;
 }
